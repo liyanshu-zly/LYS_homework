@@ -20,6 +20,7 @@
 #include "main.h"
 #include "tim.h"
 #include "gpio.h"
+#include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -27,6 +28,7 @@
 #include "encoder.h"
 #include "servo.h"
 #include "buzzer.h"
+#include "comm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +50,7 @@
 
 /* USER CODE BEGIN PV */
 #define DEG_PER_DETENT    2      
-#define EDGES_PER_DETENT  4    
+#define EDGES_PER_DETENT  4      
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -72,9 +74,12 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  int32_t angle     = 90;      
-  int32_t last_step = 0;       
-  uint8_t last_beep = 0xFF;    
+  int32_t  angle     = 90;   
+  int32_t  last_step = 0;     
+  uint32_t last_key  = 0;    
+  uint8_t  src       = 0;     
+  uint8_t  src_shown = 0xFF; 
+  int32_t  target    = 0;    
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -98,19 +103,23 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  OLED_Init();         
-  Encoder_Init();       
-  Servo_Init();        
-  Buzzer_Init();        
+  MX_USART2_UART_Init();        
 
-  OLED_ShowString(1, 1, "Servo Angle:");    
-  OLED_ShowString(3, 1, "Beep: 1s/0.2s"); 
-  OLED_ShowString(4, 1, "SILENT");        
+  OLED_Init();               
+  Comm_Init();            
+  Encoder_Init();             
+  Servo_Init();                 
+  Buzzer_Init();             
 
-  OLED_ShowNum(2, 1, (uint32_t)angle, 3);  
+  OLED_ShowString(1, 1, "Servo Angle:");
+  OLED_ShowString(3, 1, "UART 115200");
+  OLED_ShowString(4, 1, "SRC: --- ");
+
+  OLED_ShowNum(2, 1, (uint32_t)angle, 3);
   OLED_ShowString(2, 4, " deg");
 
-  last_step = Encoder_GetStep();           
+  last_step = Encoder_GetStep();       
+  last_key  = Encoder_GetKeyCount();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -120,34 +129,57 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    int32_t step  = Encoder_GetStep();      
+    int32_t step  = Encoder_GetStep();
     int32_t delta = step - last_step;
 
     if (delta >= EDGES_PER_DETENT || delta <= -EDGES_PER_DETENT)
     {
-      int32_t detents   = delta / EDGES_PER_DETENT;             
-      int32_t new_angle = angle + detents * DEG_PER_DETENT;
+      int32_t detents = delta / EDGES_PER_DETENT;        
+      int32_t na      = angle + detents * DEG_PER_DETENT;  
 
-      if (new_angle < 0)   new_angle = 0;
-      if (new_angle > 180) new_angle = 180;
+      if (na < 0)   na = 0;
+      if (na > 180) na = 180;
 
       last_step += detents * EDGES_PER_DETENT;  
 
-      if (new_angle != angle)
+      if (na != angle)
       {
-        angle = new_angle;
+        angle = na;
         Servo_SetAngle((float)angle);                
         OLED_ShowNum(2, 1, (uint32_t)angle, 3);       
+        src = 1;
       }
     }
 
-    if (Buzzer_IsOn() != last_beep)
+    if (Comm_PopTarget(&target))
     {
-      last_beep = Buzzer_IsOn();
-      OLED_ShowString(4, 1, last_beep ? "BEEPING" : "SILENT ");
+      angle = target;
+      Servo_SetAngle((float)angle);
+      OLED_ShowNum(2, 1, (uint32_t)angle, 3);
+      Buzzer_Beep(200);                            
+      src = 2;
     }
+
+    if (Encoder_GetKeyCount() != last_key)
+    {
+      last_key = Encoder_GetKeyCount();
+      angle    = 90;
+      Servo_SetAngle(90.0f);
+      OLED_ShowNum(2, 1, 90, 3);
+      Buzzer_Beep(200);
+      src = 3;
+    }
+
+  
+    if (src != src_shown)
+    {
+      src_shown = src;
+      OLED_ShowString(4, 1, (src == 1) ? "SRC: ENC " :
+                             (src == 2) ? "SRC: UART" :
+                             (src == 3) ? "SRC: KEY " : "SRC: --- ");
+    }
+    /* USER CODE END 3 */
   }
-  /* USER CODE END 3 */
 }
 
 /**
@@ -192,7 +224,7 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 /**
   * @brief 定时器更新（溢出）中断回调
-  * @note  TIM2 每 1ms 进一次，用来给蜂鸣器数 0.2s / 1s 的节奏
+  * @note  TIM2 每 1ms 进一次，给蜂鸣器做 0.2s 倒计时
   */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {

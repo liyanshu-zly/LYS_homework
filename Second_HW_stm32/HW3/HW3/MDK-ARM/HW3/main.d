@@ -30,7 +30,9 @@ hw3\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 hw3\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 hw3\main.o: ../Core/Inc/tim.h
 hw3\main.o: ../Core/Inc/gpio.h
+hw3\main.o: ../Core/Inc/usart.h
 hw3\main.o: ../BSP/OLED.h
 hw3\main.o: ../BSP/encoder.h
 hw3\main.o: ../BSP/servo.h
 hw3\main.o: ../BSP/buzzer.h
+hw3\main.o: ../BSP/comm.h
