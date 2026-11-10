@@ -1,0 +1,28 @@
+--cpu Cortex-M3
+"thridhw3\startup_stm32f103xb.o"
+"thridhw3\main.o"
+"thridhw3\gpio.o"
+"thridhw3\tim.o"
+"thridhw3\stm32f1xx_it.o"
+"thridhw3\stm32f1xx_hal_msp.o"
+"thridhw3\app.o"
+"thridhw3\pid.o"
+"thridhw3\oled.o"
+"thridhw3\stm32f1xx_hal_gpio_ex.o"
+"thridhw3\stm32f1xx_hal_tim.o"
+"thridhw3\stm32f1xx_hal_tim_ex.o"
+"thridhw3\stm32f1xx_hal.o"
+"thridhw3\stm32f1xx_hal_rcc.o"
+"thridhw3\stm32f1xx_hal_rcc_ex.o"
+"thridhw3\stm32f1xx_hal_gpio.o"
+"thridhw3\stm32f1xx_hal_dma.o"
+"thridhw3\stm32f1xx_hal_cortex.o"
+"thridhw3\stm32f1xx_hal_pwr.o"
+"thridhw3\stm32f1xx_hal_flash.o"
+"thridhw3\stm32f1xx_hal_flash_ex.o"
+"thridhw3\stm32f1xx_hal_exti.o"
+"thridhw3\system_stm32f1xx.o"
+--strict --scatter "ThridHW3\ThridHW3.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "ThridHW3.map" -o ThridHW3\ThridHW3.axf

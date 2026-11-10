@@ -1,0 +1,26 @@
+--cpu Cortex-M3
+"thirdhw2\startup_stm32f103xb.o"
+"thirdhw2\main.o"
+"thirdhw2\gpio.o"
+"thirdhw2\tim.o"
+"thirdhw2\stm32f1xx_it.o"
+"thirdhw2\stm32f1xx_hal_msp.o"
+"thirdhw2\stm32f1xx_hal_gpio_ex.o"
+"thirdhw2\stm32f1xx_hal_tim.o"
+"thirdhw2\stm32f1xx_hal_tim_ex.o"
+"thirdhw2\stm32f1xx_hal.o"
+"thirdhw2\stm32f1xx_hal_rcc.o"
+"thirdhw2\stm32f1xx_hal_rcc_ex.o"
+"thirdhw2\stm32f1xx_hal_gpio.o"
+"thirdhw2\stm32f1xx_hal_dma.o"
+"thirdhw2\stm32f1xx_hal_cortex.o"
+"thirdhw2\stm32f1xx_hal_pwr.o"
+"thirdhw2\stm32f1xx_hal_flash.o"
+"thirdhw2\stm32f1xx_hal_flash_ex.o"
+"thirdhw2\stm32f1xx_hal_exti.o"
+"thirdhw2\system_stm32f1xx.o"
+"thirdhw2\oled.o"
+--strict --scatter "ThirdHW2\ThirdHW2.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "ThirdHW2.map" -o ThirdHW2\ThirdHW2.axf
